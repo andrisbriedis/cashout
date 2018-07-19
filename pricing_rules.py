@@ -1,0 +1,2 @@
+class PricingRules(object):
+    pass

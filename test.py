@@ -1,8 +1,7 @@
-from pricing_rules import PricingRules
-from checkout import CheckOut, MissingItem
-from decimal import Decimal
-
 import unittest
+
+from checkout import CheckOut
+from pricing_rules import PricingRules, MissingItem
 
 
 class CheckoutTest(unittest.TestCase):
@@ -18,12 +17,22 @@ class CheckoutTest(unittest.TestCase):
         self.assertEqual(50, self.checkout.total())
 
     def test_non_existent_sku(self):
-        self.assertRaises(MissingItem, self.checkout.scan, "NON_EXISTING")
+        self.checkout.scan("NON_EXISTING")
+        self.assertRaises(MissingItem, self.checkout.total)
 
     def test_double_item(self):
         self.checkout.scan("A")
         self.checkout.scan("A")
         self.assertEqual(100, self.checkout.total())
+
+    def test_different_skus(self):
+        self.checkout.scan("A")
+        self.checkout.scan("B")
+        self.assertEqual(120, self.checkout.total())
+
+    def test_items_without_special_offers(self):
+        self.checkout.scan("B")
+        self.assertEqual(70, self.checkout.total())
 
     def test_special_offer(self):
         self.checkout.scan("A")
@@ -38,3 +47,15 @@ class CheckoutTest(unittest.TestCase):
         self.checkout.scan("A")
         self.checkout.scan("A")
         self.assertEqual(230, self.checkout.total())
+
+    def test_special_offer_and_mixed_items(self):
+        self.checkout.scan("A")
+        self.checkout.scan("A")
+        self.checkout.scan("B")
+        self.checkout.scan("A")
+        self.checkout.scan("A")
+        self.checkout.scan("B")
+        self.checkout.scan("A")
+        self.checkout.scan("A")
+        self.checkout.scan("A")
+        self.assertEqual(450, self.checkout.total())
